@@ -1,0 +1,43 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.cinescope'
+version = '1.0.0'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // JUnit 5
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+
+    // REST Assured with BOM
+    testImplementation platform('io.rest-assured:rest-assured-bom:5.4.0')
+    testImplementation 'io.rest-assured:rest-assured'
+    testImplementation 'io.rest-assured:json-path'
+    testImplementation 'io.rest-assured:xml-path'
+
+    // JSON parsing (Jackson)
+    testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.17.1'
+
+    // AssertJ (optional, nicer assertions)
+    testImplementation 'org.assertj:assertj-core:3.25.1'
+
+    // Hamcrest matchers (used in your tests)
+    testImplementation 'org.hamcrest:hamcrest:2.2'
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat "full"
+    }
+}
