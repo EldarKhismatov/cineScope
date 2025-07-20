@@ -1,5 +1,6 @@
 package UI.utils;
 
+import java.time.Year;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class TestDataGenerator {
@@ -13,19 +14,7 @@ public class TestDataGenerator {
     }
 
     public static String randomPassword() {
-
-        String upperCase = randomString(1).toUpperCase();
-        String lowerCase = randomString(5);
-        String numbers = String.valueOf(ThreadLocalRandom.current().nextInt(100, 999));
-        return upperCase + lowerCase + numbers;
-    }
-
-    public static String randomString(int length) {
-        StringBuilder sb = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            sb.append(CHARS.charAt(ThreadLocalRandom.current().nextInt(CHARS.length())));
-        }
-        return sb.toString();
+        return randomString(1).toUpperCase() + randomString(5) + randomInt(100, 999);
     }
 
     public static String randomFullName() {
@@ -41,8 +30,7 @@ public class TestDataGenerator {
     }
 
     public static String randomCardNumber() {
-        // Генерация валидного тестового номера карты
-        return "4" + randomNumericString(15); // Visa начинается с 4
+        return "4" + randomNumericString(15);
     }
 
     public static String randomCardHolder() {
@@ -50,9 +38,8 @@ public class TestDataGenerator {
     }
 
     public static String randomExpiryDate() {
-        int currentYear = java.time.Year.now().getValue() % 100; // 2024 -> 24
-        int year = currentYear + ThreadLocalRandom.current().nextInt(1, 5);
-        int month = ThreadLocalRandom.current().nextInt(1, 13);
+        int month = randomInt(1, 13);
+        int year = Year.now().getValue() % 100 + randomInt(1, 5);
         return String.format("%02d/%02d", month, year);
     }
 
@@ -60,11 +47,21 @@ public class TestDataGenerator {
         return randomNumericString(3);
     }
 
-    private static String randomNumericString(int length) {
+    private static int randomInt(int min, int max) {
+        return ThreadLocalRandom.current().nextInt(min, max);
+    }
+
+    public static String randomString(int length) {
         StringBuilder sb = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            sb.append(ThreadLocalRandom.current().nextInt(10));
-        }
+        for (int i = 0; i < length; i++)
+            sb.append(CHARS.charAt(randomInt(0, CHARS.length())));
+        return sb.toString();
+    }
+
+    public static String randomNumericString(int length) {
+        StringBuilder sb = new StringBuilder(length);
+        for (int i = 0; i < length; i++)
+            sb.append(randomInt(0, 10));
         return sb.toString();
     }
 }

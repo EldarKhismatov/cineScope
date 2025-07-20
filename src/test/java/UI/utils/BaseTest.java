@@ -1,5 +1,6 @@
 package UI.utils;
 
+import UI.pages.LoginPage;
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.logevents.SelenideLogger;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.openqa.selenium.chrome.ChromeOptions;
 
+import java.time.Duration;
 import java.util.Arrays;
 
 import static com.codeborne.selenide.Condition.visible;
@@ -29,8 +31,8 @@ public class BaseTest {
         Configuration.baseUrl = "https://dev-cinescope.t-qa.ru";
         Configuration.timeout = 10000;
         Configuration.pageLoadTimeout = 30000;
-        Configuration.browserCapabilities = options;
         Configuration.headless = false;
+        Configuration.browserCapabilities = options;
 
 
         SelenideLogger.addListener("AllureSelenide", new AllureSelenide()
@@ -42,8 +44,8 @@ public class BaseTest {
     @BeforeEach
     public void setup() {
         open("/");
-        $("body").shouldBe(visible);
-        $("header").shouldBe(visible);
+        $("body").shouldBe(visible, Duration.ofSeconds(15));
+        $("header").shouldBe(visible, Duration.ofSeconds(10));
     }
 
     @AfterEach

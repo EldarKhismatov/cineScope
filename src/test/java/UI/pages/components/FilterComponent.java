@@ -1,19 +1,22 @@
 package UI.pages.components;
 
+import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
 
-import static com.codeborne.selenide.Condition.text;
-import static com.codeborne.selenide.Condition.visible;
-import static com.codeborne.selenide.Selenide.$;
-import static com.codeborne.selenide.Selenide.$$;
+import java.time.Duration;
+
+import static com.codeborne.selenide.Condition.*;
+import static com.codeborne.selenide.Selenide.*;
 
 public class FilterComponent {
-    private final SelenideElement locationFilter = $("[data-qa-id='movies_filter_location_select']").parent();
+
+    private final SelenideElement locationFilter = $("[data-qa-id='movies_filter_location_select']").closest("button");
+    private final ElementsCollection locationOptions = $$("div[role='option']");
     private final SelenideElement genreFilter = $("[data-qa-id='movies_filter_genre_select']").parent();
     private final SelenideElement sortFilter = $("[data-qa-id='movies_filter_created_at_select']").parent();
 
     public FilterComponent selectLocation(String location) {
-        locationFilter.shouldBe(visible).click();
+        locationFilter.shouldBe(visible, Duration.ofSeconds(10)).click();
         $$("div[role='option']").findBy(text(location)).shouldBe(visible).click();
         return this;
     }

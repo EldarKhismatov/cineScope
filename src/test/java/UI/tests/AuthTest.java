@@ -1,23 +1,26 @@
 package UI.tests;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import UI.dto.FilmDto;
+import UI.pages.DashboardPage;
 import UI.pages.LoginPage;
 import UI.pages.MainPage;
 import UI.pages.RegisterPage;
+import UI.pages.components.AddFilmFormComponent;
 import UI.utils.BaseTest;
+import UI.utils.FilmDataFactory;
 import UI.utils.TestDataGenerator;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
+import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.$;
-import static com.codeborne.selenide.Selenide.open;
-import static com.codeborne.selenide.Condition.visible;
-import static com.codeborne.selenide.Condition.text;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Tag("ui")
-class AuthTest extends BaseTest {
+public class AuthTest extends BaseTest {
 
     @Test
-    void successfulLogin() {
+    void loginWithValidCredentials() {
         MainPage mainPage = new MainPage();
         LoginPage loginPage = mainPage.clickLoginButton();
 
@@ -25,61 +28,54 @@ class AuthTest extends BaseTest {
                 .setPassword("12345678Aa")
                 .clickSubmit();
 
-        $("div[role='status']")
-                .shouldHave(text("Вы вошли в аккаунт"))
-                .shouldBe(visible);
-
+        $("[data-qa-id=profile_page_button]").shouldBe(visible);
     }
-
     @Test
-    void failedLoginWithInvalidCredentials() {
+    void loginWithInvalidPassword() {
         MainPage mainPage = new MainPage();
         LoginPage loginPage = mainPage.clickLoginButton();
 
-        loginPage.setEmail("invalid@email.com")
-                .setPassword("wrongpassword")
+        loginPage.setEmail("test1123123213@email.com")
+                .setPassword("WrongPass123!")
                 .clickSubmit();
 
         $("div[role='status']")
-                .shouldHave(text("Неверная почта или пароль"))
-                .shouldBe(visible);
+                .shouldBe(visible)
+                .shouldHave(text("Неверная почта или пароль"));
     }
 
     @Test
-    void successfulRegistration() {
+    void registerWithValidData() {
+        MainPage mainPage = new MainPage();
+        LoginPage loginPage = mainPage.clickLoginButton();
+        RegisterPage registerPage = loginPage.clickRegisterLink();
+
         String email = TestDataGenerator.randomEmail();
         String password = TestDataGenerator.randomPassword();
 
-        MainPage mainPage = new MainPage();
-        LoginPage loginPage = mainPage.clickLoginButton();
-        RegisterPage registerPage = loginPage.clickRegisterLink();
-
-        registerPage.setFullName("Сергеев Сергей Сергеевич")
+        registerPage.setFullName(TestDataGenerator.randomFullName())
                 .setEmail(email)
                 .setPassword(password)
-                .setRepeatPassword(password)
+                .setPasswordRepeat(password)
                 .clickSubmit();
 
         $("div[role='status']")
-                .shouldHave(text("Вы зарегистрировались"))
-                .shouldBe(visible);
-
+                .shouldBe(visible)
+                .shouldHave(text("Вы зарегистрировались"));
     }
 
     @Test
-    void registrationWithExistingEmail() {
+    void registerWithMismatchedPasswords() {
         MainPage mainPage = new MainPage();
         LoginPage loginPage = mainPage.clickLoginButton();
         RegisterPage registerPage = loginPage.clickRegisterLink();
 
-        registerPage.setFullName("Иванов Иван Иванович")
-                .setEmail("test1123123213@email.com")
+        registerPage.setFullName("User Test")
+                .setEmail(TestDataGenerator.randomEmail())
                 .setPassword("12345678Aa")
-                .setRepeatPassword("12345678Aa")
+                .setPasswordRepeat("12345678Ab")
                 .clickSubmit();
 
-        $("div[role='status']")
-                .shouldHave(text("Пользователь с таким email уже существует"))
-                .shouldBe(visible);
+        $("p[role='alert']").shouldHave(text("Введенные пароли не совпадают"));
     }
 }

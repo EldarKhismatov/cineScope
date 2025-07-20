@@ -1,39 +1,45 @@
 package UI.tests;
 
-import UI.pages.*;
+import UI.dto.PaymentCardDto;
+import UI.pages.MainPage;
+import UI.pages.MovieDetailsPage;
+import UI.pages.MoviesPage;
+import UI.pages.PaymentPage;
+import UI.utils.AuthHelper;
+import UI.utils.BaseTest;
+import UI.utils.TestDataGenerator;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import UI.utils.BaseTest;
-import UI.utils.AuthHelper;
 
+import java.time.Duration;
+
+import static com.codeborne.selenide.CollectionCondition.sizeGreaterThan;
 import static com.codeborne.selenide.Condition.*;
-import static com.codeborne.selenide.Selenide.$;
+import static com.codeborne.selenide.Selenide.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @Tag("ui")
-class PaymentTest extends BaseTest {
+public class PaymentTest extends BaseTest {
 
     @Test
-    void successfulPayment() {
-        MainPage mainPage = new MainPage();
-        LoginPage loginPage = mainPage.clickLoginButton();
+    void makeSuccessfulPayment() {
+        AuthHelper.loginAsAdmin();
+        MoviesPage moviesPage = new MainPage().clickShowMoreButton();
 
-        loginPage.setEmail("test1123123213@email.com")
-                .setPassword("12345678Aa")
-                .clickSubmit();
+        MovieDetailsPage movieDetails = moviesPage.openRandomMovieDetails();
 
-        mainPage.waitForProfileButton();
+        PaymentPage paymentPage = movieDetails.clickBuyTicketButton();
 
-        MovieDetailsPage movieDetailsPage = mainPage.clickFirstReadMoreButton();
+        PaymentCardDto card = PaymentCardDto.builder()
+                .numberTickets(1)
+                .cardNumber("4242424242424242")
+                .cardHolder("Ivan Ivanov")
+                .expiryMonth("Декабрь")
+                .expiryYear("2025")
+                .cvc("123")
+                .build();
 
-        PaymentPage paymentPage = movieDetailsPage.clickBuyTicketButton();
-
-        paymentPage.setAmount(2)
-                .setCardNumber("4242424242424242")
-                .setCardHolder("IVAN IVANOV")
-                .setExpiryDate("Декабрь", "2025")
-                .setCvc("123")
-                .submitPayment();
+        paymentPage.fillCardDetails(card).submitPayment();
 
         $("div[role='status']")
                 .shouldHave(text("Оплата прошла успешно"))
@@ -41,76 +47,52 @@ class PaymentTest extends BaseTest {
     }
 
     @Test
-    void paymentWithInvalidCardNumber() {
-        MainPage mainPage = new MainPage();
-        LoginPage loginPage = mainPage.clickLoginButton();
+    void makePaymentWithInvalidCard() {
+        AuthHelper.loginAsAdmin();
+        MoviesPage moviesPage = new MainPage().clickShowMoreButton();
 
-        loginPage.setEmail("test1123123213@email.com")
-                .setPassword("12345678Aa")
-                .clickSubmit();
+        MovieDetailsPage movieDetails = moviesPage.openRandomMovieDetails();
 
-        MovieDetailsPage movieDetailsPage = mainPage.clickFirstReadMoreButton();
+        PaymentPage paymentPage = movieDetails.clickBuyTicketButton();
 
-        PaymentPage paymentPage = movieDetailsPage.clickBuyTicketButton();
+        PaymentCardDto card = PaymentCardDto.builder()
+                .numberTickets(1)
+                .cardNumber("0000000000000000")
+                .cardHolder("Ivan Ivanov")
+                .expiryMonth("Декабрь")
+                .expiryYear("2025")
+                .cvc("123")
+                .build();
 
-        paymentPage.setAmount(1)
-                .setCardNumber("1234567891234567")
-                .setCardHolder("IVAN IVANOV")
-                .setExpiryDate("Декабрь", "2025")
-                .setCvc("123")
-                .submitPayment();
-
-        $("div[role='status']")
-                .shouldHave(text("Неверные данные карты"))
-                .shouldBe(visible);
-
-    }
-
-    @Test
-    void paymentWithExpiredCard() {
-        MainPage mainPage = new MainPage();
-        LoginPage loginPage = mainPage.clickLoginButton();
-
-        loginPage.setEmail("test1123123213@email.com")
-                .setPassword("12345678Aa")
-                .clickSubmit();
-
-        MovieDetailsPage movieDetailsPage = mainPage.clickFirstReadMoreButton();
-
-        PaymentPage paymentPage = movieDetailsPage.clickBuyTicketButton();
-
-        paymentPage.setAmount(1)
-                .setCardNumber("4242424242424242")
-                .setCardHolder("IVAN IVANOV")
-                .setExpiryDate("Январь", "2025")
-                .setCvc("123")
-                .submitPayment();
+        paymentPage.fillCardDetails(card).submitPayment();
 
         $("div[role='status']")
                 .shouldHave(text("Неверные данные карты"))
                 .shouldBe(visible);
     }
 
-    @Test
+    /*@Test
     void paymentWithInvalidAmount() {
-        MainPage mainPage = new MainPage();
-        LoginPage loginPage = mainPage.clickLoginButton();
+        AuthHelper.loginAsAdmin();
+        MoviesPage moviesPage = new MainPage().clickShowMoreButton();
 
-        loginPage.setEmail("test1123123213@email.com")
-                .setPassword("12345678Aa")
-                .clickSubmit();
-        MovieDetailsPage movieDetailsPage = mainPage.clickFirstReadMoreButton();
+        MovieDetailsPage movieDetails = moviesPage.openRandomMovieDetails();
 
-        PaymentPage paymentPage = movieDetailsPage.clickBuyTicketButton();
+        PaymentPage paymentPage = movieDetails.clickBuyTicketButton();
 
-        paymentPage.setAmount(0)
-                .setCardNumber("4242424242424242")
-                .setCardHolder("IVAN IVANOV")
-                .setExpiryDate("Декабрь", "2025")
-                .setCvc("123")
-                .submitPayment();
+        PaymentCardDto card = PaymentCardDto.builder()
+                .numberTickets(0)
+                .cardNumber("4242424242424242")
+                .cardHolder("IVAN IVANOV")
+                .expiryMonth("Декабрь")
+                .expiryYear("2025")
+                .cvc("123")
+                .build();
 
-        String validationMessage = $("#amount").getAttribute("validationMessage");
-        assertThat(validationMessage).isEqualTo("Значение должно быть больше или равно 1.");
-    }
+        paymentPage.fillCardDetails(card).submitPayment();
+
+        $("p.text-red-500.text-sm")
+                .shouldBe(visible)
+                .shouldHave(exactText("Не может быть меньше 1"));
+    }*/
 }

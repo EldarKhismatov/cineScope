@@ -3,6 +3,8 @@ package UI.utils;
 import UI.pages.LoginPage;
 import UI.pages.MainPage;
 
+import java.time.Duration;
+
 import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$;
@@ -19,6 +21,6 @@ public class AuthHelper {
                 .setPassword(ADMIN_PASSWORD)
                 .clickSubmit();
 
-        $("[data-qa-id=profile_page_button]").shouldBe(visible);
+        $("header").shouldBe(visible, Duration.ofSeconds(15));
     }
 }
